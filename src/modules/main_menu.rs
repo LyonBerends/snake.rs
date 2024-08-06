@@ -20,7 +20,7 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, main_menu_item
         if *selected > main_menu_items.len() {*selected = main_menu_items.len();}
 
         frame.render_widget(b, area);
-        frame.render_stateful_widget(inner_b, area.inner(Margin::new(40, 20)), &mut ListState::default().with_selected(Some(*selected)));
+        frame.render_stateful_widget(inner_b, area.inner(Margin::new(area.width / 5, area.height / 5)), &mut ListState::default().with_selected(Some(*selected)));
     })?;
 
     Ok(())
