@@ -89,7 +89,7 @@ impl Game {
         let mut body : VecDeque<(i32, i32)> = VecDeque::new();
         body.push_back((x as i32, y as i32));
 
-        self.snake = Some(Snake {body, velocity : (0, 1), length : 3, moving : Move::Down});
+        self.snake = Some(Snake {body, velocity : (0, 1), length : 30, moving : Move::Down});
     }
 
     pub fn start(&mut self, screen : Screen, size : Rect) {

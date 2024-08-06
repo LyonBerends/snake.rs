@@ -36,7 +36,7 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Ga
         
         match rule {
             Rule::Bordered => {
-                if new_pos.0 >= area.width as i32 || new_pos.0 <= 0 || new_pos.1 >= area.height as i32 || new_pos.1 <= 1 {
+                if new_pos.0 >= area.width as i32 - 1 || new_pos.0 <= 0 || new_pos.1 >= area.height as i32 - 1 || new_pos.1 <= 0 {
                     game.die();
                     return ();
                 }
