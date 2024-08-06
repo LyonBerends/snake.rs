@@ -3,7 +3,6 @@ use std::collections::VecDeque;
 use rand::{rngs::ThreadRng, Rng};
 use ratatui::layout::Rect;
 
-
 #[derive(Clone, Copy)]
 pub enum Rule {
     Bordered,
@@ -11,7 +10,8 @@ pub enum Rule {
 }
 pub enum Screen {
     MainMenu,
-    Snake (Rule)
+    Snake (Rule),
+    GameOver (u32)
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -27,7 +27,8 @@ pub struct Game {
     pub screen : Screen,
     pub snake : Option<Snake>,
     pub fruit : Option<(usize, usize)>,
-    pub rng : ThreadRng
+    pub rng : ThreadRng,
+    pub points : u32
 }
 
 #[derive(Clone)]
@@ -63,10 +64,6 @@ impl Snake {
             self.moving = Move::Down;
         }
     }
-
-    pub fn eat(&mut self) {
-        self.length += 1;
-    }
 }
 
 impl Game {
@@ -76,16 +73,19 @@ impl Game {
             screen : Screen::MainMenu,
             snake : None,
             fruit : None,
-            rng : rand::thread_rng()
+            rng : rand::thread_rng(),
+            points : 0
         }
     }
 
-    pub fn die(&mut self) {
+    pub fn game_over(&mut self) {
         self.snake = None;
-        self.screen = Screen::MainMenu;
+        self.screen = Screen::GameOver(self.points);
     }
 
     pub fn spawn_snake(&mut self, x : u16, y : u16) {
+        self.points = 0;
+
         let mut body : VecDeque<(i32, i32)> = VecDeque::new();
         body.push_back((x as i32, y as i32));
 
@@ -111,6 +111,8 @@ impl Game {
 
     pub fn eat_fruit(&mut self, size : Rect) {
         self.fruit = None;
+
+        self.points += 100;
 
         self.snake.as_mut().unwrap().length += 1;
         self.spawn_fruit(size);

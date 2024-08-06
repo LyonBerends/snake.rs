@@ -1,4 +1,4 @@
-use std::io::Stdout;
+use std::{io::Stdout, thread::sleep, time::Duration};
 
 use ratatui::{layout::Rect, prelude::CrosstermBackend, style::Stylize, widgets::{Block, Paragraph}, Terminal};
 
@@ -9,6 +9,7 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Ga
         let area = frame.size();
 
         let b = match rule {Rule::Bordered => {Block::bordered()}, Rule::NoBorder => {Block::default()}};
+        frame.render_widget(b, area);
 
         let mut new_pos;
         
@@ -37,7 +38,7 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Ga
         match rule {
             Rule::Bordered => {
                 if new_pos.0 >= area.width as i32 - 1 || new_pos.0 <= 0 || new_pos.1 >= area.height as i32 - 1 || new_pos.1 <= 0 {
-                    game.die();
+                    game.game_over();
                     return ();
                 }
             },
@@ -50,8 +51,9 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Ga
         }
 
         let snake = game.snake.as_mut().unwrap();
+
         if snake.body.contains(&new_pos) {
-            game.die();
+            game.game_over();
             return ();
         }
 
@@ -59,9 +61,9 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Ga
         if snake.body.len() > snake.length {
             snake.body.pop_front();
         }
-
-        frame.render_widget(b, area);
     })?;
+
+    sleep(Duration::from_millis(33));
 
     Ok(())
 }
