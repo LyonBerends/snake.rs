@@ -13,26 +13,24 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Ga
 
         let mut new_pos;
         
-        {
-            let snake = game.snake.as_ref().unwrap();
+        let snake = game.snake.as_ref().unwrap();
 
-            for pos in snake.body.iter() {
-                frame.render_widget(Paragraph::new("█").green(), Rect::new(pos.0 as u16, pos.1 as u16, 1, 1));
-            }
-
-            let last = *snake.body.back().unwrap();
-            new_pos = (last.0 + snake.velocity.0, last.1 + snake.velocity.1);
+        for pos in snake.body.iter() {
+            frame.render_widget(Paragraph::new("█").green(), Rect::new(pos.0 as u16, pos.1 as u16, 1, 1));
         }
 
-        let fruit_clone = game.fruit.clone();
+        let last = *snake.body.back().unwrap();
+        new_pos = (last.0 + snake.velocity.0, last.1 + snake.velocity.1);
 
-        if fruit_clone.is_some() {
-            let fruit = fruit_clone.unwrap();
-            if (new_pos.0 as usize, new_pos.1 as usize) == fruit {
-                game.eat_fruit(area);
-            } else {
-                frame.render_widget(Paragraph::new("█").red(), Rect::new(fruit.0 as u16, fruit.1 as u16, 1, 1));
-            }
+        match game.fruit {
+            Some(fruit) => {
+                if (new_pos.0 as usize, new_pos.1 as usize) == fruit {
+                    game.eat_fruit(area);
+                } else {
+                    frame.render_widget(Paragraph::new("█").red(), Rect::new(fruit.0 as u16, fruit.1 as u16, 1, 1));
+                }
+            },
+            None => {}
         }
         
         match rule {
