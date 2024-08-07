@@ -14,6 +14,12 @@ pub enum Screen {
     GameOver (u32)
 }
 
+pub enum Fruit {
+    Common ((usize, usize)),
+    Uncommon ((usize, usize)),
+    Rare ((usize, usize))
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Move {
     Left,
@@ -26,7 +32,7 @@ pub struct Game {
     pub exit : bool,
     pub screen : Screen,
     pub snake : Option<Snake>,
-    pub fruit : Option<(usize, usize)>,
+    pub fruit : Option<Fruit>,
     pub rng : ThreadRng,
     pub points : u32
 }
@@ -101,20 +107,34 @@ impl Game {
     }
 
     pub fn spawn_fruit(&mut self, size : Rect) {
-        while self.fruit == None {
+        while self.fruit.is_none() {
             let fruit_coords = (self.rng.gen_range(2..size.as_size().width) as usize, self.rng.gen_range(2..size.as_size().height) as usize);
             if !self.snake.as_mut().unwrap().body.contains(&(fruit_coords.0 as i32, fruit_coords.1 as i32)) {
-                self.fruit = Some(fruit_coords);
+                let num = self.rng.gen_range(0..=10);
+                if num == 10 {self.fruit = Some(Fruit::Rare(fruit_coords))}
+                if num > 6 && num < 10 {self.fruit = Some(Fruit::Uncommon(fruit_coords))}
+                if num <= 5 {self.fruit = Some(Fruit::Common(fruit_coords))}
             }
         }
     }
 
     pub fn eat_fruit(&mut self, size : Rect) {
-        self.fruit = None;
+        match self.fruit.as_ref().unwrap() {
+            Fruit::Common(_) => {
+                self.points += 100;
+                self.snake.as_mut().unwrap().length += 1;
+            },
+            Fruit::Uncommon(_) => {
+                self.points += 200;
+                self.snake.as_mut().unwrap().length += 2;
+            },
+            Fruit::Rare(_) => {
+                self.points += 500;
+                self.snake.as_mut().unwrap().length += 5;
+            },
+        }
 
-        self.points += 100;
-
-        self.snake.as_mut().unwrap().length += 1;
+        self.fruit = None;        
         self.spawn_fruit(size);
     }
 }

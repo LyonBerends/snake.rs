@@ -2,7 +2,7 @@ use std::{io::Stdout, thread::sleep, time::Duration};
 
 use ratatui::{layout::Rect, prelude::CrosstermBackend, style::Stylize, widgets::{Block, Paragraph}, Terminal};
 
-use super::game::{Game, Rule};
+use super::game::{Fruit, Game, Rule};
 
 pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Game, rule : Rule) -> std::io::Result<()> {
     terminal.draw(|frame| {
@@ -22,12 +22,30 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Ga
         let last = *snake.body.back().unwrap();
         new_pos = (last.0 + snake.velocity.0, last.1 + snake.velocity.1);
 
-        match game.fruit {
+        match game.fruit.as_mut() {
             Some(fruit) => {
-                if (new_pos.0 as usize, new_pos.1 as usize) == fruit {
-                    game.eat_fruit(area);
-                } else {
-                    frame.render_widget(Paragraph::new("█").red(), Rect::new(fruit.0 as u16, fruit.1 as u16, 1, 1));
+                match fruit {
+                    Fruit::Common(loc) => {
+                        if (new_pos.0 as usize, new_pos.1 as usize) == *loc {
+                            game.eat_fruit(area);
+                        } else {
+                            frame.render_widget(Paragraph::new("█").red(), Rect::new(loc.0 as u16, loc.1 as u16, 1, 1));
+                        }
+                    },
+                    Fruit::Uncommon(loc) => {
+                        if (new_pos.0 as usize, new_pos.1 as usize) == *loc {
+                            game.eat_fruit(area);
+                        } else {
+                            frame.render_widget(Paragraph::new("█").blue(), Rect::new(loc.0 as u16, loc.1 as u16, 1, 1));
+                        }
+                    },
+                    Fruit::Rare(loc) => {
+                        if (new_pos.0 as usize, new_pos.1 as usize) == *loc {
+                            game.eat_fruit(area);
+                        } else {
+                            frame.render_widget(Paragraph::new("█").yellow(), Rect::new(loc.0 as u16, loc.1 as u16, 1, 1));
+                        }
+                    }
                 }
             },
             None => {}
