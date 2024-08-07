@@ -1,6 +1,6 @@
 use std::{io::Stdout, thread::sleep, time::Duration};
 
-use ratatui::{layout::Rect, prelude::CrosstermBackend, style::Stylize, widgets::{Block, Paragraph}, Terminal};
+use ratatui::{layout::Rect, prelude::CrosstermBackend, style::{Style, Stylize}, widgets::{Block, Paragraph}, Terminal};
 
 use super::game::{Fruit, Game, Rule};
 
@@ -22,33 +22,36 @@ pub fn render(terminal : &mut Terminal<CrosstermBackend<Stdout>>, game : &mut Ga
         let last = *snake.body.back().unwrap();
         new_pos = (last.0 + snake.velocity.0, last.1 + snake.velocity.1);
 
+        let fruit_loc : (usize, usize);
+        let fruit_style;
+
         match game.fruit.as_mut() {
             Some(fruit) => {
                 match fruit {
                     Fruit::Common(loc) => {
-                        if (new_pos.0 as usize, new_pos.1 as usize) == *loc {
-                            game.eat_fruit(area);
-                        } else {
-                            frame.render_widget(Paragraph::new("█").red(), Rect::new(loc.0 as u16, loc.1 as u16, 1, 1));
-                        }
+                        fruit_loc = *loc;
+                        fruit_style = Style::new().red();
                     },
                     Fruit::Uncommon(loc) => {
-                        if (new_pos.0 as usize, new_pos.1 as usize) == *loc {
-                            game.eat_fruit(area);
-                        } else {
-                            frame.render_widget(Paragraph::new("█").blue(), Rect::new(loc.0 as u16, loc.1 as u16, 1, 1));
-                        }
+                        fruit_loc = *loc;
+                        fruit_style = Style::new().blue();
                     },
                     Fruit::Rare(loc) => {
-                        if (new_pos.0 as usize, new_pos.1 as usize) == *loc {
-                            game.eat_fruit(area);
-                        } else {
-                            frame.render_widget(Paragraph::new("█").yellow(), Rect::new(loc.0 as u16, loc.1 as u16, 1, 1));
-                        }
+                        fruit_loc = *loc;
+                        fruit_style = Style::new().yellow();
                     }
                 }
             },
-            None => {}
+            None => {
+                fruit_loc = (0xffffffff, 0xffffffff);
+                fruit_style = Style::new();
+            }
+        }
+
+        if (new_pos.0 as usize, new_pos.1 as usize) == fruit_loc {
+            game.eat_fruit(area);
+        } else {
+            frame.render_widget(Paragraph::new("█").style(fruit_style), Rect::new(fruit_loc.0 as u16, fruit_loc.1 as u16, 1, 1));
         }
         
         match rule {
